@@ -6,10 +6,10 @@ import re
 app = Flask(__name__)
 
 # Ollama API endpoint
-OLLAMA_API_URL = "http://ollama:11434"  # Update this if your Ollama instance is running elsewhere
+OLLAMA_API_URL = "https://c749-35-240-242-84.ngrok-free.app"  # Update this if your Ollama instance is running elsewhere
 
 # Initialize Ollama model
-model = OllamaLLM(model="mistral:latest", base_url=OLLAMA_API_URL, temperature=0)
+model = OllamaLLM(model="mistral:7b-instruct-v0.2-q4_0", base_url=OLLAMA_API_URL, temperature=0)
 
 # Define the template
 template = """Extrayez l'événement principal et listez les détails suivants et reponder en francais :
@@ -61,9 +61,9 @@ chain = prompt | model
 def parse_ollama_response(response):
     print(response)
     # Extract who, when, and where using regex
-    who_match = re.search(r'- Qui : (.+)', response)
-    when_match = re.search(r'- Quand \(jj-mm-aaaa\) : (.+)', response)
-    where_match = re.search(r'- Où : (.+)', response)
+    who_match = re.search(r'- Who: (.+)', response)
+    when_match = re.search(r'- When \(mm-dd-yyyy\): (.+)', response)
+    where_match = re.search(r'- Where: (.+)', response)
 
     # Extract the values or use None if not found
     who = who_match.group(1).strip() if who_match else None
@@ -88,10 +88,10 @@ def analyze_text():
         # Call the chain with the provided text
         result = chain.invoke({"text": text})
 
-        # # Parse the Ollama response
-        # parsed_result = parse_ollama_response(result)
+        # Parse the Ollama response
+        parsed_result = parse_ollama_response(result)
 
-        return jsonify(result)
+        return jsonify(parsed_result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
